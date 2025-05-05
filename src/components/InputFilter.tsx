@@ -32,7 +32,7 @@ const InputFilter = ({
   
   // Animation classes based on filtering state
   const contentClasses = isInputFiltered && activeDemoStep >= 1
-    ? "border-red-500/50 bg-red-500/10"
+    ? "border-red-500 bg-red-500/10"
     : activeDemoStep >= 1 && !isInputFiltered
     ? "border-green-500/50 bg-green-500/10"
     : "border-slate-700 bg-slate-800";
@@ -97,19 +97,24 @@ const InputFilter = ({
         />
         
         {activeDemoStep >= 1 && isInputFiltered && (
-          <div className="absolute inset-0 bg-slate-900/30 backdrop-blur-sm flex flex-col items-center justify-center p-4">
-            <CircleX className="h-10 w-10 text-red-500 mb-2" />
-            <p className="text-center text-red-400 font-medium">Content Filtered</p>
-            <p className="text-center text-sm text-slate-300 mt-1">
-              This prompt contains potentially harmful content and has been blocked.
-            </p>
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm flex flex-col items-center justify-center p-4">
+            <div className="bg-red-500/10 p-6 rounded-lg border border-red-500 max-w-md">
+              <CircleX className="h-10 w-10 text-red-500 mb-2 mx-auto" />
+              <p className="text-center text-red-400 font-medium">Content Filtered</p>
+              <p className="text-center text-sm text-slate-300 mt-1">
+                This prompt contains potentially harmful content and has been blocked.
+              </p>
+            </div>
           </div>
         )}
       </div>
       
       {userInput && activeDemoStep === 0 && findProblematicWords(userInput).length > 0 && (
         <div className="p-4 bg-red-500/10 border-t border-red-500/30">
-          <h4 className="text-sm font-medium mb-2 text-red-400">Problematic Content Preview:</h4>
+          <h4 className="text-sm font-medium mb-2 text-red-400 flex items-center gap-1">
+            <Ban className="h-3.5 w-3.5" />
+            Problematic Content Detected:
+          </h4>
           <HighlightedContent 
             content={userInput} 
             className="text-sm text-slate-300"

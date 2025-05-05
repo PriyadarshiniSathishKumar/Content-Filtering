@@ -34,12 +34,12 @@ const HighlightedContent: React.FC<HighlightedContentProps> = ({ content, classN
       <TooltipProvider key={`highlight-${i}`}>
         <Tooltip>
           <TooltipTrigger asChild>
-            <span className="bg-red-500/20 text-red-500 rounded px-0.5 font-medium">
+            <span className="bg-red-500/30 text-red-400 rounded px-1 font-medium border border-red-500/40">
               {content.substring(index, index + word.length)}
             </span>
           </TooltipTrigger>
-          <TooltipContent>
-            <p>Potentially problematic term</p>
+          <TooltipContent className="bg-red-950 border-red-500 text-red-200">
+            <p>Potentially harmful term</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

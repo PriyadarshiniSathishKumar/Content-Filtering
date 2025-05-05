@@ -2,9 +2,9 @@
 import { ContentScores, PromptType } from "@/types/filtering";
 
 // Simple keyword-based scoring system (would be ML-based in a real system)
-const toxicityKeywords = ["harmful", "dangerous", "offensive", "hateful"];
-const biasKeywords = ["always", "never", "all", "none", "only"];
-const offensivenessKeywords = ["stupid", "dumb", "idiot", "loser"];
+const toxicityKeywords = ["harmful", "dangerous", "offensive", "hateful", "violent", "toxic"];
+const biasKeywords = ["always", "never", "all", "none", "only", "every", "nobody"];
+const offensivenessKeywords = ["stupid", "dumb", "idiot", "loser", "hate", "terrible"];
 
 // All problematic words combined for highlighting
 export const allProblematicWords = [

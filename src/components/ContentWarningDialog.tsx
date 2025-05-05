@@ -13,6 +13,7 @@ import {
 import { Ban } from "lucide-react";
 import { ContentScores } from "@/types/filtering";
 import ContentScoresComponent from "@/components/ContentScores";
+import HighlightedContent from "@/components/HighlightedContent";
 
 interface ContentWarningDialogProps {
   isOpen: boolean;
@@ -43,21 +44,23 @@ const ContentWarningDialog: React.FC<ContentWarningDialogProps> = ({
   
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
-      <AlertDialogContent className="max-w-2xl">
-        <AlertDialogHeader>
+      <AlertDialogContent className="max-w-2xl border-red-500">
+        <AlertDialogHeader className="bg-red-500/10 p-4 -mt-6 -mx-6 rounded-t-lg border-b border-red-500/30">
           <AlertDialogTitle className="flex items-center gap-2 text-red-500">
             <Ban className="h-5 w-5" /> 
-            Potentially Harmful Content Detected
+            Harmful Content Detected
           </AlertDialogTitle>
-          <AlertDialogDescription>
+          <AlertDialogDescription className="text-red-200">
             The content you entered contains potentially harmful, biased, or offensive language. 
-            Please review the content before proceeding.
+            Please review the highlighted content before proceeding.
           </AlertDialogDescription>
         </AlertDialogHeader>
         
         <div className="bg-slate-800 p-4 rounded-md border border-slate-700 my-4">
           <h3 className="text-sm font-medium mb-2 text-slate-300">Content:</h3>
-          <div className="text-white whitespace-pre-wrap">{content}</div>
+          <div className="text-white whitespace-pre-wrap">
+            <HighlightedContent content={content} />
+          </div>
         </div>
         
         {contentScores && (
@@ -68,7 +71,7 @@ const ContentWarningDialog: React.FC<ContentWarningDialogProps> = ({
         )}
         
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleCancel}>
+          <AlertDialogCancel onClick={handleCancel} className="border-red-500/30 hover:bg-red-500/10 hover:text-red-400">
             Edit Content
           </AlertDialogCancel>
           <AlertDialogAction 

@@ -1,4 +1,5 @@
 
+// Define the allowed prompt types for content filtering
 export type PromptType = "neutral" | "borderline" | "harmful";
 
 export interface ContentFilterResult {

@@ -1,7 +1,7 @@
 
 import { ContentScores as ContentScoresType } from "@/types/filtering";
 import { Progress } from "@/components/ui/progress";
-import { ThumbsDown, Ban, Warning } from "lucide-react";
+import { ThumbsDown, Ban, BatteryWarning } from "lucide-react";
 
 interface ContentScoresProps {
   scores: ContentScoresType | undefined;
@@ -28,7 +28,7 @@ const ContentScores = ({ scores, showDetails = false }: ContentScoresProps) => {
   const getScoreIcon = (type: keyof ContentScoresType) => {
     const score = scores[type];
     if (type === "toxicity") return <Ban className="h-4 w-4" />;
-    if (type === "bias") return <Warning className="h-4 w-4" />;
+    if (type === "bias") return <BatteryWarning className="h-4 w-4" />;
     if (type === "offensiveness") return <ThumbsDown className="h-4 w-4" />;
     return null;
   };

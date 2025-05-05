@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Shield, Eye, CircleX, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";

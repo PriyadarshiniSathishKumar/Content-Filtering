@@ -91,7 +91,7 @@ const ContentFilterDemo = () => {
               toast({
                 title: "Output Modified",
                 description: "The generated content was modified to remove potentially inappropriate elements.",
-                variant: "warning",
+                variant: "default",  // Changed from "warning" to "default"
               });
             } else {
               toast({

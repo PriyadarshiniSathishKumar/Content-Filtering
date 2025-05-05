@@ -11,6 +11,7 @@ import ExamplePrompts from "@/components/ExamplePrompts";
 import ContentScores from "@/components/ContentScores";
 import { PromptType, ContentScores as ContentScoresType } from "@/types/filtering";
 import { scoreContent, getSeverityFromScore, getActionFromSeverity, getPromptTypeFromScore } from "@/utils/contentScoring";
+import ContentWarningDialog from "@/components/ContentWarningDialog";
 
 const ContentFilterDemo = () => {
   const { toast } = useToast();
@@ -26,7 +27,8 @@ const ContentFilterDemo = () => {
   const [showExplanation, setShowExplanation] = useState(false);
   const [contentScores, setContentScores] = useState<ContentScoresType | undefined>(undefined);
   const [outputScores, setOutputScores] = useState<ContentScoresType | undefined>(undefined);
-
+  const [showWarningDialog, setShowWarningDialog] = useState(false);
+  
   // Demo sequence control
   const nextStep = () => {
     if (activeDemoStep < 3) {
@@ -53,6 +55,16 @@ const ContentFilterDemo = () => {
     const scores = scoreContent(userInput);
     setContentScores(scores);
     
+    // If content is harmful, show warning dialog before proceeding
+    if (scores.overall > 50) {
+      setShowWarningDialog(true);
+      return;
+    }
+    
+    processDemoSteps(scores);
+  };
+  
+  const processDemoSteps = (scores: ContentScoresType) => {
     // Determine action based on scores
     const severity = getSeverityFromScore(scores.overall);
     const action = getActionFromSeverity(severity);
@@ -249,6 +261,21 @@ const ContentFilterDemo = () => {
           </div>
         </div>
       </div>
+
+      <ContentWarningDialog 
+        isOpen={showWarningDialog}
+        onClose={() => setShowWarningDialog(false)}
+        content={userInput}
+        contentScores={contentScores}
+        onProceed={() => {
+          setShowWarningDialog(false);
+          if (contentScores) processDemoSteps(contentScores);
+        }}
+        onCancel={() => {
+          setShowWarningDialog(false);
+          setIsProcessing(false);
+        }}
+      />
     </div>
   );
 };

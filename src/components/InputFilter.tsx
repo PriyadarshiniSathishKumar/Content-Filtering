@@ -4,6 +4,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { CircleX, Shield } from "lucide-react";
 import { PromptType, ContentScores } from "@/types/filtering";
 import ContentScoresComponent from "@/components/ContentScores";
+import ContentWarningDialog from "@/components/ContentWarningDialog";
+import HighlightedContent from "@/components/HighlightedContent";
+import { findProblematicWords, scoreContent } from "@/utils/contentScoring";
 
 interface InputFilterProps {
   userInput: string;
@@ -24,12 +27,46 @@ const InputFilter = ({
   setPromptType,
   contentScores
 }: InputFilterProps) => {
+  const [isWarningOpen, setIsWarningOpen] = useState(false);
+  const [pendingInput, setPendingInput] = useState("");
+  
   // Animation classes based on filtering state
   const contentClasses = isInputFiltered && activeDemoStep >= 1
     ? "border-red-500/50 bg-red-500/10"
     : activeDemoStep >= 1 && !isInputFiltered
     ? "border-green-500/50 bg-green-500/10"
     : "border-slate-700 bg-slate-800";
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newInput = e.target.value;
+    
+    // Check for problematic words in real-time
+    const problematicWords = findProblematicWords(newInput);
+    const shouldWarn = problematicWords.length > 0;
+    
+    if (shouldWarn && newInput.length > userInput.length && newInput !== userInput) {
+      // Only show warning when adding new content that's harmful
+      setPendingInput(newInput);
+      setIsWarningOpen(true);
+    } else {
+      // No harmful content or user is deleting text, update normally
+      updateInput(newInput);
+    }
+  };
+  
+  const updateInput = (input: string) => {
+    // Automatically detect prompt type based on score
+    const scores = scoreContent(input);
+    if (scores.overall >= 70) {
+      setPromptType("harmful");
+    } else if (scores.overall >= 30) {
+      setPromptType("borderline");
+    } else {
+      setPromptType("neutral");
+    }
+    
+    setUserInput(input);
+  };
   
   return (
     <div className={`rounded-lg overflow-hidden transition-all duration-500 ${contentClasses}`}>
@@ -53,20 +90,7 @@ const InputFilter = ({
       <div className="p-4 relative">
         <Textarea
           value={userInput}
-          onChange={(e) => {
-            setUserInput(e.target.value);
-            // Automatically detect prompt type based on content
-            // This is simplified - a real system would use ML models
-            if (e.target.value.toLowerCase().includes("harmful") || 
-                e.target.value.toLowerCase().includes("violence")) {
-              setPromptType("harmful");
-            } else if (e.target.value.toLowerCase().includes("borderline") || 
-                      e.target.value.toLowerCase().includes("questionable")) {
-              setPromptType("borderline");
-            } else {
-              setPromptType("neutral");
-            }
-          }}
+          onChange={handleInputChange}
           placeholder="Enter a prompt for the AI... (try including words like 'harmful' or 'borderline')"
           className={`min-h-[120px] bg-slate-900 border-slate-700 ${activeDemoStep >= 1 && isInputFiltered ? "opacity-60" : ""}`}
           disabled={activeDemoStep >= 1}
@@ -82,6 +106,16 @@ const InputFilter = ({
           </div>
         )}
       </div>
+      
+      {userInput && activeDemoStep === 0 && findProblematicWords(userInput).length > 0 && (
+        <div className="p-4 bg-red-500/10 border-t border-red-500/30">
+          <h4 className="text-sm font-medium mb-2 text-red-400">Problematic Content Preview:</h4>
+          <HighlightedContent 
+            content={userInput} 
+            className="text-sm text-slate-300"
+          />
+        </div>
+      )}
       
       {activeDemoStep >= 1 && !isInputFiltered && (
         <div className="p-4 bg-slate-900/50 border-t border-slate-700">
@@ -109,6 +143,15 @@ const InputFilter = ({
           <ContentScoresComponent scores={contentScores} showDetails={true} />
         </div>
       )}
+      
+      <ContentWarningDialog
+        isOpen={isWarningOpen}
+        onClose={() => setIsWarningOpen(false)}
+        content={pendingInput}
+        contentScores={pendingInput ? scoreContent(pendingInput) : undefined}
+        onProceed={() => updateInput(pendingInput)}
+        onCancel={() => setPendingInput("")}
+      />
     </div>
   );
 };

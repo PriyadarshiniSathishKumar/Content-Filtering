@@ -6,6 +6,13 @@ const toxicityKeywords = ["harmful", "dangerous", "offensive", "hateful"];
 const biasKeywords = ["always", "never", "all", "none", "only"];
 const offensivenessKeywords = ["stupid", "dumb", "idiot", "loser"];
 
+// All problematic words combined for highlighting
+export const allProblematicWords = [
+  ...toxicityKeywords,
+  ...biasKeywords,
+  ...offensivenessKeywords
+];
+
 /**
  * Scores content based on toxicity, bias, and offensiveness
  * @param content The text content to score
@@ -36,6 +43,32 @@ export const scoreContent = (content: string): ContentScores => {
     offensiveness,
     overall
   };
+};
+
+/**
+ * Find harmful words in a text and return their positions
+ * @param content The text to analyze
+ * @returns Array of found problematic words with their positions
+ */
+export const findProblematicWords = (content: string): { word: string, index: number }[] => {
+  const results: { word: string, index: number }[] = [];
+  const contentLower = content.toLowerCase();
+  
+  allProblematicWords.forEach(word => {
+    let startIndex = 0;
+    let foundIndex;
+    
+    while ((foundIndex = contentLower.indexOf(word, startIndex)) !== -1) {
+      results.push({ 
+        word, 
+        index: foundIndex 
+      });
+      startIndex = foundIndex + word.length;
+    }
+  });
+  
+  // Sort by position in text
+  return results.sort((a, b) => a.index - b.index);
 };
 
 /**

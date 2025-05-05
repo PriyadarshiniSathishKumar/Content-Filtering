@@ -4,7 +4,9 @@ import { ShieldCheck, Shield } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import ContentScores from "@/components/ContentScores";
+import HighlightedContent from "@/components/HighlightedContent";
 import { ContentScores as ContentScoresType } from "@/types/filtering";
+import { findProblematicWords } from "@/utils/contentScoring";
 
 interface OutputFilterProps {
   activeDemoStep: number;
@@ -31,6 +33,9 @@ const OutputFilter = ({
       ? "border-green-500/50 bg-green-500/10"
       : "border-slate-700 bg-slate-800";
   
+  // Check if output contains problematic content
+  const hasProblematicWords = generatedOutput && findProblematicWords(generatedOutput).length > 0;
+  
   return (
     <div className={`rounded-lg overflow-hidden transition-all duration-500 ${contentClasses}`}>
       <div className="p-4 border-b border-slate-700 flex justify-between items-center">
@@ -51,12 +56,18 @@ const OutputFilter = ({
       </div>
       
       <div className="p-4">
-        <Textarea
-          value={activeDemoStep >= 2 ? generatedOutput : ""}
-          readOnly
-          placeholder="AI generated content will appear here..."
-          className="min-h-[120px] bg-slate-900 border-slate-700"
-        />
+        {activeDemoStep >= 2 && hasProblematicWords ? (
+          <div className="min-h-[120px] p-3 bg-slate-900 border border-slate-700 rounded-md">
+            <HighlightedContent content={generatedOutput} />
+          </div>
+        ) : (
+          <Textarea
+            value={activeDemoStep >= 2 ? generatedOutput : ""}
+            readOnly
+            placeholder="AI generated content will appear here..."
+            className="min-h-[120px] bg-slate-900 border-slate-700"
+          />
+        )}
       </div>
       
       {activeDemoStep >= 2 && contentScores && (

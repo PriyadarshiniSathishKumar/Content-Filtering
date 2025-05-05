@@ -1,17 +1,23 @@
 
 import { Shield, CircleX, ShieldCheck } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
+import ContentScores from "@/components/ContentScores";
+import { ContentScores as ContentScoresType } from "@/types/filtering";
 
 interface FilteringProcessProps {
   activeDemoStep: number;
   isInputFiltered: boolean;
   isOutputFiltered: boolean;
+  inputScores?: ContentScoresType;
+  outputScores?: ContentScoresType;
 }
 
 const FilteringProcess = ({ 
   activeDemoStep, 
   isInputFiltered, 
-  isOutputFiltered 
+  isOutputFiltered,
+  inputScores,
+  outputScores
 }: FilteringProcessProps) => {
   const steps = [
     { id: 0, name: "Start", status: "complete" },
@@ -59,16 +65,16 @@ const FilteringProcess = ({
               <p className="text-sm text-slate-400">
                 {step.id === 1 && activeDemoStep >= 1 && (
                   isInputFiltered ? 
-                    "Harmful content detected in input. Process stopped." : 
-                    "Input passed safety checks. Proceeding to AI processing."
+                    `Harmful content detected in input (${inputScores ? Math.round(inputScores.overall) + '% harmful' : ''}). Process stopped.` : 
+                    `Input passed safety checks (${inputScores ? Math.round(inputScores.overall) + '% harmful' : ''}). Proceeding to AI processing.`
                 )}
                 {step.id === 2 && activeDemoStep >= 2 && (
                   "AI generating content based on the filtered input."
                 )}
                 {step.id === 3 && activeDemoStep >= 3 && (
                   isOutputFiltered ? 
-                    "Output contained problematic elements. Content modified." : 
-                    "Content passed output filtering. Safe to deliver."
+                    `Output contained problematic elements (${outputScores ? Math.round(outputScores.overall) + '% harmful' : ''}). Content modified.` : 
+                    `Content passed output filtering (${outputScores ? Math.round(outputScores.overall) + '% harmful' : ''}). Safe to deliver.`
                 )}
                 {(step.status === 'upcoming' || (step.id !== 1 && step.id !== 2 && step.id !== 3)) && (
                   "Waiting to be processed..."
@@ -120,6 +126,20 @@ const FilteringProcess = ({
           )}
         </p>
       </div>
+      
+      {activeDemoStep >= 1 && inputScores && (
+        <div className="mt-6 p-4 rounded-lg border border-slate-700 bg-slate-800/50">
+          <h4 className="font-medium mb-2">Input Content Risk Assessment:</h4>
+          <ContentScores scores={inputScores} />
+        </div>
+      )}
+      
+      {activeDemoStep >= 2 && !isInputFiltered && outputScores && (
+        <div className="mt-6 p-4 rounded-lg border border-slate-700 bg-slate-800/50">
+          <h4 className="font-medium mb-2">Output Content Risk Assessment:</h4>
+          <ContentScores scores={outputScores} />
+        </div>
+      )}
     </div>
   );
 };

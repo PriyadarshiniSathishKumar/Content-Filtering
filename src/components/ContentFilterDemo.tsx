@@ -3,13 +3,15 @@ import { useState, useEffect } from "react";
 import { Shield, Eye, CircleX, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import FilteringProcess from "@/components/FilteringProcess";
 import InputFilter from "@/components/InputFilter";
 import OutputFilter from "@/components/OutputFilter";
 import FilteringExplanation from "@/components/FilteringExplanation";
 import ExamplePrompts from "@/components/ExamplePrompts";
-import { PromptType } from "@/types/filtering";
+import ContentScores from "@/components/ContentScores";
+import { PromptType, ContentScores as ContentScoresType } from "@/types/filtering";
+import { scoreContent, getSeverityFromScore, getActionFromSeverity, getPromptTypeFromScore } from "@/utils/contentScoring";
 
 const ContentFilterDemo = () => {
   const { toast } = useToast();
@@ -23,6 +25,8 @@ const ContentFilterDemo = () => {
   const [promptType, setPromptType] = useState<PromptType>("neutral");
   const [filterLevel, setFilterLevel] = useState<"low" | "medium" | "high">("medium");
   const [showExplanation, setShowExplanation] = useState(false);
+  const [contentScores, setContentScores] = useState<ContentScoresType | undefined>(undefined);
+  const [outputScores, setOutputScores] = useState<ContentScoresType | undefined>(undefined);
 
   // Demo sequence control
   const nextStep = () => {
@@ -39,22 +43,36 @@ const ContentFilterDemo = () => {
     setIsOutputFiltered(false);
     setGeneratedOutput("");
     setIsProcessing(false);
+    setContentScores(undefined);
+    setOutputScores(undefined);
   };
 
   const startDemo = () => {
     setIsProcessing(true);
     
+    // Score the input content
+    const scores = scoreContent(userInput);
+    setContentScores(scores);
+    
+    // Determine action based on scores
+    const severity = getSeverityFromScore(scores.overall);
+    const action = getActionFromSeverity(severity);
+    const calculatedPromptType = getPromptTypeFromScore(scores.overall);
+    
+    // Set prompt type based on scores rather than keywords
+    setPromptType(calculatedPromptType);
+    
     // Simulate processing with timeouts to animate the steps
     setTimeout(() => {
       // Step 1: Input filtering
       setActiveDemoStep(1);
-      const shouldFilterInput = promptType === "harmful";
+      const shouldFilterInput = calculatedPromptType === "harmful";
       setIsInputFiltered(shouldFilterInput);
       
       if (shouldFilterInput) {
         toast({
           title: "Input Filtered",
-          description: "Potentially harmful content detected in the input prompt.",
+          description: `Content scored ${Math.round(scores.overall)}% harmful - blocked.`,
           variant: "destructive",
         });
       }
@@ -67,7 +85,7 @@ const ContentFilterDemo = () => {
           // Generate appropriate output based on prompt type
           let output = "";
           
-          switch(promptType) {
+          switch(calculatedPromptType) {
             case "harmful":
               output = "This content has been flagged as potentially harmful.";
               break;
@@ -81,22 +99,26 @@ const ContentFilterDemo = () => {
           
           setGeneratedOutput(output);
           
+          // Score the generated output too
+          const outputContentScores = scoreContent(output);
+          setOutputScores(outputContentScores);
+          
           setTimeout(() => {
             // Step 3: Output filtering
             setActiveDemoStep(3);
-            const shouldFilterOutput = promptType === "borderline" && filterLevel === "high";
+            const shouldFilterOutput = calculatedPromptType === "borderline" && filterLevel === "high";
             setIsOutputFiltered(shouldFilterOutput);
             
             if (shouldFilterOutput) {
               toast({
                 title: "Output Modified",
                 description: "The generated content was modified to remove potentially inappropriate elements.",
-                variant: "default",  // Changed from "warning" to "default"
+                variant: "default", 
               });
             } else {
               toast({
                 title: "Content Delivered",
-                description: promptType === "neutral" ? 
+                description: calculatedPromptType === "neutral" ? 
                   "Safe content passed all filters." : 
                   "Content passed with the current filter sensitivity level.",
               });
@@ -176,6 +198,7 @@ const ContentFilterDemo = () => {
                 activeDemoStep={activeDemoStep}
                 promptType={promptType}
                 setPromptType={setPromptType}
+                contentScores={contentScores}
               />
               
               <OutputFilter
@@ -184,6 +207,7 @@ const ContentFilterDemo = () => {
                 generatedOutput={generatedOutput}
                 filterLevel={filterLevel}
                 setFilterLevel={setFilterLevel}
+                contentScores={outputScores}
               />
             </div>
           </TabsContent>
@@ -193,6 +217,8 @@ const ContentFilterDemo = () => {
               activeDemoStep={activeDemoStep}
               isInputFiltered={isInputFiltered}
               isOutputFiltered={isOutputFiltered}
+              inputScores={contentScores}
+              outputScores={outputScores}
             />
           </TabsContent>
         </Tabs>

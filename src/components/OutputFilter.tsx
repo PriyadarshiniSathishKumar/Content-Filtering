@@ -3,6 +3,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { ShieldCheck, Shield } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import ContentScores from "@/components/ContentScores";
+import { ContentScores as ContentScoresType } from "@/types/filtering";
 
 interface OutputFilterProps {
   activeDemoStep: number;
@@ -10,6 +12,7 @@ interface OutputFilterProps {
   generatedOutput: string;
   filterLevel: "low" | "medium" | "high";
   setFilterLevel: (level: "low" | "medium" | "high") => void;
+  contentScores?: ContentScoresType;
 }
 
 const OutputFilter = ({
@@ -17,7 +20,8 @@ const OutputFilter = ({
   isOutputFiltered,
   generatedOutput,
   filterLevel,
-  setFilterLevel
+  setFilterLevel,
+  contentScores
 }: OutputFilterProps) => {
   // Animation classes based on filtering state and demo step
   const contentClasses = 
@@ -54,6 +58,13 @@ const OutputFilter = ({
           className="min-h-[120px] bg-slate-900 border-slate-700"
         />
       </div>
+      
+      {activeDemoStep >= 2 && contentScores && (
+        <div className="p-4 bg-slate-900/50 border-t border-slate-700">
+          <h4 className="text-sm font-medium mb-2">Output Scoring:</h4>
+          <ContentScores scores={contentScores} showDetails={true} />
+        </div>
+      )}
       
       <div className="p-4 bg-slate-900/50 border-t border-slate-700">
         <div className="flex justify-between items-center mb-3">

@@ -2,7 +2,8 @@
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { CircleX, Shield } from "lucide-react";
-import { PromptType } from "@/types/filtering";
+import { PromptType, ContentScores } from "@/types/filtering";
+import ContentScoresComponent from "@/components/ContentScores";
 
 interface InputFilterProps {
   userInput: string;
@@ -11,6 +12,7 @@ interface InputFilterProps {
   activeDemoStep: number;
   promptType: PromptType;
   setPromptType: (type: PromptType) => void;
+  contentScores?: ContentScores;
 }
 
 const InputFilter = ({ 
@@ -19,7 +21,8 @@ const InputFilter = ({
   isInputFiltered, 
   activeDemoStep,
   promptType,
-  setPromptType
+  setPromptType,
+  contentScores
 }: InputFilterProps) => {
   // Animation classes based on filtering state
   const contentClasses = isInputFiltered && activeDemoStep >= 1
@@ -97,6 +100,13 @@ const InputFilter = ({
               <div className="mt-1 text-green-400">Low Risk</div>
             </div>
           </div>
+        </div>
+      )}
+      
+      {activeDemoStep >= 1 && contentScores && (
+        <div className="p-4 bg-slate-900/50 border-t border-slate-700">
+          <h4 className="text-sm font-medium mb-2">Content Scoring:</h4>
+          <ContentScoresComponent scores={contentScores} showDetails={true} />
         </div>
       )}
     </div>

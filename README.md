@@ -1,4 +1,6 @@
-# Welcome to your Lovable project
+# Content Filtering in Gen AI
+<img width="1885" height="805" alt="image" src="https://github.com/user-attachments/assets/bd1c11f9-0a4c-492b-a079-c1c05af9c0d3" />
+<img width="1882" height="801" alt="image" src="https://github.com/user-attachments/assets/5c748046-32db-497a-ba3b-29e58c33410c" />
 
 ## Project info
 
